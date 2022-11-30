@@ -20,8 +20,10 @@ export function Layout(props: LayoutProps) {
         <BottomNavigation />
       </nav>
       <style jsx>{`
-        max-width: 960px;
-        margin: auto;
+        .layout {
+          max-width: 960px;
+          margin: auto;
+        }
 
         @media (max-width: 600px) {
           .content {

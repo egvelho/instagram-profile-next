@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/src_gatsby
 /.pnp
 .pnp.js
 

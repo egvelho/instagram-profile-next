@@ -1,5 +1,6 @@
 import { MdArrowLeft, MdArrowRight } from "react-icons/md";
 import Link from "next/link";
+import Image from "next/image";
 
 export type FeedProps = {
   items: FeedItemProps[];
@@ -52,7 +53,18 @@ export function Feed({ items, pagination }: FeedProps) {
 function FeedItem({ image, link, title }: FeedItemProps) {
   return (
     <Link href={link}>
-      <img src={image} alt={title} />
+      <Image
+        src={image}
+        width="200"
+        height="200"
+        alt={title}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          aspectRatio: "1",
+        }}
+      />
     </Link>
   );
 }

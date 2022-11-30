@@ -1,11 +1,11 @@
 import { Avatar } from "./Avatar";
 
-export type PostView = {
+export type PostViewProps = {
   image: string;
   authorAvatar: string;
   authorUsername: string;
   content: string;
-  publishDate: Date;
+  publishDate: string;
 };
 
 export function PostView({
@@ -14,7 +14,7 @@ export function PostView({
   authorUsername,
   content,
   publishDate,
-}: PostView) {
+}: PostViewProps) {
   return (
     <div className="post-view">
       <div className="image-container row">
@@ -36,8 +36,8 @@ export function PostView({
           dangerouslySetInnerHTML={{ __html: content }}
         />
         <div className="content-item">
-          <time dateTime={publishDate.toJSON()}>
-            {publishDate.toLocaleDateString("pt-br")}
+          <time dateTime={new Date(publishDate).toJSON()}>
+            {new Date(publishDate).toLocaleDateString("pt-br")}
           </time>
         </div>
       </div>
