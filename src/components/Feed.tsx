@@ -83,7 +83,11 @@ function Pagination({
           (_, index) => index + 1
         ).map((page) => {
           if (page === currentPage) {
-            return <span className="pagination-link current-page">{page}</span>;
+            return (
+              <span key={page} className="pagination-link current-page">
+                {page}
+              </span>
+            );
           }
 
           return (

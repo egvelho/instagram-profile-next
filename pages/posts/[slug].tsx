@@ -1,17 +1,25 @@
 import type { GetStaticPaths, GetStaticProps } from "next";
 import { apolloClient, gql } from "src/apolloClient";
 import { PostView, PostViewProps } from "src/components/PostView";
+import { Head } from "src/components/Head";
 import { remark } from "remark";
 import html from "remark-html";
 
-export type PostPageProps = PostViewProps;
+export type PostPageProps = {
+  title: string;
+} & PostViewProps;
 
 export type PostPageQuery = {
   slug: string;
 };
 
 export default function PostPage(props: PostPageProps) {
-  return <PostView {...props} />;
+  return (
+    <div className="post-page">
+      <Head title={props.title} />
+      <PostView {...props} />
+    </div>
+  );
 }
 
 export const getStaticProps: GetStaticProps<
@@ -59,6 +67,7 @@ export const getStaticProps: GetStaticProps<
       author: authorUsername,
       content,
       publishDate,
+      title,
       image: {
         data: {
           attributes: { url: imageUrl },
@@ -74,6 +83,7 @@ export const getStaticProps: GetStaticProps<
 
   return {
     props: {
+      title,
       image: `https://webservices.jumpingcrab.com${imageUrl}`,
       authorAvatar: `https://webservices.jumpingcrab.com${avatarUrl}`,
       publishDate,

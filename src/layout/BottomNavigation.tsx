@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { GrFavorite, GrHomeRounded } from "react-icons/gr";
-import { Avatar } from "../components/Avatar";
+import { Avatar } from "src/components/Avatar";
 
 const bottomNavigationHeight = "48px";
 

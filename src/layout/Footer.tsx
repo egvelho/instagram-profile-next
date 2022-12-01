@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ContactForm } from "../components/ContactForm";
+import { ContactForm } from "src/components/ContactForm";
 
 export function Footer() {
   return (
@@ -34,7 +34,7 @@ export function Footer() {
           font-size: 12px;
         }
 
-        .item:not(first-child) {
+        .item:not(:first-child) {
           margin-left: 16px;
         }
       `}</style>

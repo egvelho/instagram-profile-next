@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Avatar } from "./Avatar";
 
 export type PostViewProps = {
@@ -18,7 +19,20 @@ export function PostView({
   return (
     <div className="post-view">
       <div className="image-container row">
-        {image && <img src={image} alt="" />}
+        {image && (
+          <Image
+            priority
+            src={image}
+            width="800"
+            height="800"
+            alt=""
+            style={{
+              objectFit: "cover",
+              width: "100%",
+              height: "auto",
+            }}
+          />
+        )}
       </div>
       <div className="content-container row">
         <header className="content-item avatar-container">

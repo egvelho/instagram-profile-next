@@ -1,4 +1,5 @@
 import type { GetStaticPaths, GetStaticProps } from "next";
+import { Head } from "src/components/Head";
 import { apolloClient, gql } from "src/apolloClient";
 import { Feed, FeedProps } from "src/components/Feed";
 
@@ -12,7 +13,19 @@ export type PostPageQuery = {
 };
 
 export default function PostPage({ posts, pagination }: PostPageProps) {
-  return <Feed items={posts} pagination={pagination} />;
+  const title = `Página ${pagination?.currentPage} de ${pagination?.pageCount}`;
+  return (
+    <div className="post-page">
+      <Head title={title} />
+      <h1 className="title">{title}</h1>
+      <Feed items={posts} pagination={pagination} />
+      <style jsx>{`
+        .title {
+          margin-top: 32px;
+        }
+      `}</style>
+    </div>
+  );
 }
 
 export const getStaticProps: GetStaticProps<
