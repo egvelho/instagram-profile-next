@@ -88,7 +88,7 @@ function Pagination({
 
           return (
             <Link
-              href={page === 1 ? "/" : `/posts/${page}`}
+              href={page === 1 ? "/" : `/posts/page/${page}`}
               key={page}
               className="reset-anchor"
               title={`Ir para a página ${page}`}
@@ -101,7 +101,9 @@ function Pagination({
       <div className="pagination-mobile">
         {hasPreviousPage && (
           <Link
-            href={currentPage - 1 === 1 ? "/" : `/posts/${currentPage - 1}`}
+            href={
+              currentPage - 1 === 1 ? "/" : `/posts/page/${currentPage - 1}`
+            }
             className="reset-anchor"
             title="Voltar uma página"
           >
@@ -112,7 +114,7 @@ function Pagination({
         )}
         {hasNextPage && (
           <Link
-            href={`/posts/${currentPage + 1}`}
+            href={`/posts/page/${currentPage + 1}`}
             className="reset-anchor"
             title="Avançar para a próxima página"
           >
