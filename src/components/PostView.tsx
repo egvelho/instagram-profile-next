@@ -29,7 +29,6 @@ export function PostView({
             style={{
               objectFit: "cover",
               width: "100%",
-              height: "auto",
             }}
           />
         )}
