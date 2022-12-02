@@ -1,5 +1,5 @@
 import { GrFavorite, GrHomeRounded } from "react-icons/gr";
-import { UserAvatar } from "src/components/UserAvatar";
+import { UserAvatar } from "src/cms/components/UserAvatar";
 
 export function AppBarItems() {
   return (

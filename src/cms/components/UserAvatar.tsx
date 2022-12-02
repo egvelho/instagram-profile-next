@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useLazyQuery } from "src/apolloClient";
-import { queryUserAvatar } from "src/cms/queries/queryUserAvatar";
-import { decodeUserInfo } from "src/cms/decoders/decodeUserInfo";
 import { Avatar, AvatarProps } from "src/components/Avatar";
+import { queryUserAvatar } from "../queries/queryUserAvatar";
+import { decodeUserInfo } from "../decoders/decodeUserInfo";
 
 export type UserAvatarProps = Omit<AvatarProps, "src" | "alt">;
 

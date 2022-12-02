@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { MdSearch } from "react-icons/md";
-import { useSearchPosts } from "src/cms/hooks/useSearchPosts";
+import { useSearchPosts } from "../hooks/useSearchPosts";
 
 export function SearchBar() {
   const router = useRouter();
