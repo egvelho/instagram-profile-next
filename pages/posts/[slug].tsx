@@ -1,6 +1,8 @@
 import type { GetStaticPaths, GetStaticProps } from "next";
+import { useQuery } from "@apollo/client";
 import { apolloClient, gql } from "src/apolloClient";
 import { PostView, PostViewProps } from "src/components/PostView";
+import { Feed, FeedProps } from "src/components/Feed";
 import { Head } from "src/components/Head";
 import { remark } from "remark";
 import html from "remark-html";
@@ -14,12 +16,46 @@ export type PostPageQuery = {
 };
 
 export default function PostPage(props: PostPageProps) {
+  const { posts, loading } = useLatestPosts();
+
   return (
     <div className="post-page">
       <Head title={props.title} />
       <PostView {...props} />
+      <div className="latest-posts">{!loading && <Feed items={posts} />}</div>
+      <style jsx>{`
+        .latest-posts {
+          margin-top: 32px;
+        }
+      `}</style>
     </div>
   );
+}
+
+function useLatestPosts() {
+  const { data, loading } = useQuery(lastestPostsQuery);
+
+  const posts: FeedProps["items"] = data
+    ? data.posts.data.map(
+        ({
+          attributes: {
+            title,
+            slug,
+            image: {
+              data: {
+                attributes: { url: image },
+              },
+            },
+          },
+        }: any) => ({
+          image: `https://webservices.jumpingcrab.com${image}`,
+          link: `/posts/${slug}`,
+          title,
+        })
+      )
+    : [];
+
+  return { posts, loading };
 }
 
 export const getStaticProps: GetStaticProps<
@@ -123,3 +159,23 @@ export const getStaticPaths: GetStaticPaths<PostPageQuery> = async () => {
     fallback: false,
   };
 };
+
+const lastestPostsQuery = gql`
+  query {
+    posts(sort: ["updatedAt"], pagination: { limit: 6 }) {
+      data {
+        attributes {
+          title
+          slug
+          image {
+            data {
+              attributes {
+                url
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;

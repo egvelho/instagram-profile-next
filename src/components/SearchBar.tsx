@@ -1,14 +1,64 @@
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/router";
 import { MdSearch } from "react-icons/md";
+import { debounce } from "lodash";
+import { useLazyQuery, gql } from "@apollo/client";
 
 export function SearchBar() {
+  const router = useRouter();
+  const [searchInput, setSearchInput] = useState("");
+  const [searchPosts, { data, loading }] = useLazyQuery(searchPostsQuery);
+  const debouncedSearchPosts = useCallback(debounce(searchPosts, 1000), []);
+
+  const posts: SearchResult[] = data
+    ? data.posts.data.map(({ attributes: { title, slug } }: any) => ({
+        link: `/posts/${slug}`,
+        title,
+      }))
+    : [];
+
+  useEffect(() => {
+    if (searchInput.length > 0) {
+      debouncedSearchPosts({
+        variables: {
+          searchInput,
+        },
+      });
+    }
+  }, [searchInput]);
+
   return (
     <div className="search-bar">
-      <div className="icon">
-        <MdSearch size="22px" />
+      <div className="search-bar-input">
+        <div className="icon">
+          <MdSearch size="22px" />
+        </div>
+        <input
+          type="search"
+          placeholder="Pesquisar..."
+          value={searchInput}
+          onChange={(event) => setSearchInput(event.target.value)}
+        />
       </div>
-      <input type="search" placeholder="Pesquisar..." />
+      {!loading && searchInput.length > 0 && (
+        <div className="search-bar-results">
+          <SearchResults
+            results={posts}
+            onClickResult={(result) => {
+              router.push(result.link);
+              setSearchInput("");
+            }}
+          />
+        </div>
+      )}
       <style jsx>{`
         .search-bar {
+          position: relative;
+        }
+
+        .search-bar-input {
+          z-index: 1002;
+          position: relative;
           background-color: #f0f0f0;
           display: flex;
           padding: 6px 12px;
@@ -31,3 +81,93 @@ export function SearchBar() {
     </div>
   );
 }
+
+type SearchResult = {
+  title: string;
+  link: string;
+};
+
+type SearchResultsProps = {
+  results: SearchResult[];
+  onClickResult: (searchResult: SearchResult) => void;
+};
+
+function SearchResults({ results, onClickResult }: SearchResultsProps) {
+  return (
+    <div className="search-results">
+      {results.map((result) => (
+        <div className="result-item" key={result.link}>
+          <a
+            href={result.link}
+            onClick={(event) => {
+              event.preventDefault();
+              onClickResult(result);
+            }}
+          >
+            {result.title}
+          </a>
+        </div>
+      ))}
+      <style jsx>{`
+        a:hover {
+          text-decoration: none;
+        }
+
+        .search-results {
+          z-index: 1001;
+          position: absolute;
+          top: calc(100% - 4px);
+          padding-top: 4px;
+          left: 0;
+          width: 100%;
+          box-sizing: border-box;
+          background-color: #fff;
+          border: solid 1px #f0f0f0;
+        }
+
+        .search-results,
+        .result-item:last-child {
+          border-bottom-left-radius: 8px;
+          border-bottom-right-radius: 8px;
+        }
+
+        .result-item {
+          padding: 12px;
+          font-weight: bold;
+        }
+
+        .result-item:not(:last-child) {
+          border-bottom: solid 1px #f0f0f0;
+        }
+
+        .result-item:hover {
+          background-color: #f0f0f0;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+const searchPostsQuery = gql`
+  query SearchPosts($searchInput: String!) {
+    posts(
+      filters: {
+        or: [
+          {
+            title: { containsi: $searchInput }
+            content: { containsi: $searchInput }
+          }
+        ]
+      }
+      pagination: { limit: 6 }
+      sort: ["updatedAt"]
+    ) {
+      data {
+        attributes {
+          title
+          slug
+        }
+      }
+    }
+  }
+`;
