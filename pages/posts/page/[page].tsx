@@ -1,7 +1,11 @@
 import type { GetStaticPaths, GetStaticProps } from "next";
 import { Head } from "src/components/Head";
-import { apolloClient, gql } from "src/apolloClient";
 import { Feed, FeedProps } from "src/components/Feed";
+import { apolloClient } from "src/apolloClient";
+import { decodePagination } from "src/cms/decoders/decodePagination";
+import { queryPostPageCount } from "src/cms/queries/queryPostPageCount";
+import { getPostPage } from "src/cms/functions/getPostPage";
+import { mapPostsToFeedItems } from "src/cms/functions/mapPostsToFeedItems";
 
 export type PostPageProps = {
   posts: FeedProps["items"];
@@ -32,91 +36,17 @@ export const getStaticProps: GetStaticProps<
   PostPageProps,
   PostPageQuery
 > = async ({ params }) => {
-  const result = await apolloClient.query({
-    query: gql`
-      query {
-        posts(pagination: { pageSize: 9, page: ${params?.page ?? 1} }) {
-          meta {
-            pagination {
-              page
-              pageCount
-            }
-          }
-          data {
-            attributes {
-              title
-              slug
-              image {
-                data {
-                  attributes {
-                    url
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
-  });
-
-  const posts: FeedProps["items"] = result.data.posts.data.map(
-    ({
-      attributes: {
-        title,
-        slug,
-        image: {
-          data: {
-            attributes: { url: image },
-          },
-        },
-      },
-    }: any) => ({
-      image: `https://webservices.jumpingcrab.com${image}`,
-      link: `/posts/${slug}`,
-      title,
-    })
-  );
-
-  const { page: currentPage, pageCount } = result.data.posts.meta.pagination;
-
+  const props = await getPostPageProps(Number(params?.page ?? 1));
   return {
-    props: {
-      posts,
-      pagination: {
-        currentPage,
-        pageCount,
-        hasNextPage: pageCount > currentPage,
-        hasPreviousPage: currentPage > 1,
-      },
-    },
+    props,
   };
 };
 
 export const getStaticPaths: GetStaticPaths<PostPageQuery> = async () => {
-  const result = await apolloClient.query({
-    query: gql`
-      query {
-        posts(pagination: { pageSize: 9, page: 1 }) {
-          meta {
-            pagination {
-              pageCount
-            }
-          }
-        }
-      }
-    `,
+  const { data } = await apolloClient.query({
+    query: queryPostPageCount,
   });
-
-  const {
-    data: {
-      posts: {
-        meta: {
-          pagination: { pageCount },
-        },
-      },
-    },
-  } = result;
+  const { pageCount } = decodePagination(data);
   const postsPage: string[] = Array.from({ length: pageCount }, (_, index) =>
     (index + 1).toString()
   );
@@ -126,3 +56,19 @@ export const getStaticPaths: GetStaticPaths<PostPageQuery> = async () => {
     fallback: false,
   };
 };
+
+async function getPostPageProps(page: number): Promise<PostPageProps> {
+  const results = await getPostPage(page);
+  const posts = mapPostsToFeedItems(results.posts);
+
+  const { pageCount, page: currentPage } = results.pagination;
+
+  const pagination = {
+    currentPage,
+    pageCount,
+    hasNextPage: pageCount > currentPage,
+    hasPreviousPage: currentPage > 1,
+  };
+
+  return { posts, pagination };
+}

@@ -40,7 +40,7 @@ export function PostView({
             <Avatar
               src={authorAvatar}
               alt={`Foto de ${authorUsername}`}
-              size="48px"
+              size={48}
             />
           )}
           <span>{authorUsername}</span>

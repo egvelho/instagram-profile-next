@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { GrFavorite, GrHomeRounded } from "react-icons/gr";
-import { Avatar } from "src/components/Avatar";
+import { UserAvatar } from "src/components/UserAvatar";
 
 const bottomNavigationHeight = "48px";
 
@@ -14,11 +14,7 @@ export function BottomNavigation() {
         <GrHomeRounded size="22px" aria-label="Home" />
       </Link>
       <span className="item">
-        <Avatar
-          src="https://eduardovelho.com/images/egvelho.jpg"
-          alt="Foto de egvelho"
-          size="36px"
-        />
+        <UserAvatar size={36} />
       </span>
       <style jsx>{`
         .bottom-navigation {

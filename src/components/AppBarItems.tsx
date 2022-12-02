@@ -1,5 +1,5 @@
 import { GrFavorite, GrHomeRounded } from "react-icons/gr";
-import { Avatar } from "./Avatar";
+import { UserAvatar } from "src/components/UserAvatar";
 
 export function AppBarItems() {
   return (
@@ -11,11 +11,7 @@ export function AppBarItems() {
         <GrHomeRounded size="22px" aria-label="Home" />
       </a>
       <span className="item">
-        <Avatar
-          src="https://eduardovelho.com/images/egvelho.jpg"
-          alt="Foto de egvelho"
-          size="36px"
-        />
+        <UserAvatar size={36} />
       </span>
       <style jsx>{`
         .app-bar-items {

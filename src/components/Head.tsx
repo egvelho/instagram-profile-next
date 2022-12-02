@@ -5,9 +5,10 @@ export type HeadProps = {
 };
 
 export function Head({ title }: HeadProps) {
+  const metaTitle = `${title} | Instagram Profile`;
   return (
     <NextHead>
-      <title>{title} | Instagram Profile</title>
+      <title>{metaTitle}</title>
     </NextHead>
   );
 }

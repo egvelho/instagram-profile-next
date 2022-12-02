@@ -1,25 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import { MdSearch } from "react-icons/md";
-import { debounce } from "lodash";
-import { useLazyQuery, gql } from "@apollo/client";
+import { useSearchPosts } from "src/cms/hooks/useSearchPosts";
 
 export function SearchBar() {
   const router = useRouter();
   const [searchInput, setSearchInput] = useState("");
-  const [searchPosts, { data, loading }] = useLazyQuery(searchPostsQuery);
-  const debouncedSearchPosts = useCallback(debounce(searchPosts, 1000), []);
-
-  const posts: SearchResult[] = data
-    ? data.posts.data.map(({ attributes: { title, slug } }: any) => ({
-        link: `/posts/${slug}`,
-        title,
-      }))
-    : [];
+  const { posts, searchPosts, loading } = useSearchPosts();
 
   useEffect(() => {
     if (searchInput.length > 0) {
-      debouncedSearchPosts({
+      searchPosts({
         variables: {
           searchInput,
         },
@@ -43,7 +34,10 @@ export function SearchBar() {
       {!loading && searchInput.length > 0 && (
         <div className="search-bar-results">
           <SearchResults
-            results={posts}
+            results={posts.map(({ slug, title }) => ({
+              link: `/posts/${slug}`,
+              title,
+            }))}
             onClickResult={(result) => {
               router.push(result.link);
               setSearchInput("");
@@ -147,27 +141,3 @@ function SearchResults({ results, onClickResult }: SearchResultsProps) {
     </div>
   );
 }
-
-const searchPostsQuery = gql`
-  query SearchPosts($searchInput: String!) {
-    posts(
-      filters: {
-        or: [
-          {
-            title: { containsi: $searchInput }
-            content: { containsi: $searchInput }
-          }
-        ]
-      }
-      pagination: { limit: 6 }
-      sort: ["updatedAt"]
-    ) {
-      data {
-        attributes {
-          title
-          slug
-        }
-      }
-    }
-  }
-`;

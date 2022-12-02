@@ -1,11 +1,13 @@
 import type { GetStaticPaths, GetStaticProps } from "next";
-import { useQuery } from "@apollo/client";
-import { apolloClient, gql } from "src/apolloClient";
+import { useLatestPosts } from "src/cms/hooks/useLatestPosts";
+import { apolloClient } from "src/apolloClient";
 import { PostView, PostViewProps } from "src/components/PostView";
-import { Feed, FeedProps } from "src/components/Feed";
+import { Feed } from "src/components/Feed";
 import { Head } from "src/components/Head";
-import { remark } from "remark";
-import html from "remark-html";
+import { processMarkdown } from "src/processMarkdown";
+import { queryPostsSlugs } from "src/cms/queries/queryPostsSlugs";
+import { decodePosts } from "src/cms/decoders/decodePosts";
+import { queryPostsBySlug } from "src/cms/queries/queryPostsBySlug";
 
 export type PostPageProps = {
   title: string;
@@ -32,150 +34,39 @@ export default function PostPage(props: PostPageProps) {
   );
 }
 
-function useLatestPosts() {
-  const { data, loading } = useQuery(lastestPostsQuery);
-
-  const posts: FeedProps["items"] = data
-    ? data.posts.data.map(
-        ({
-          attributes: {
-            title,
-            slug,
-            image: {
-              data: {
-                attributes: { url: image },
-              },
-            },
-          },
-        }: any) => ({
-          image: `https://webservices.jumpingcrab.com${image}`,
-          link: `/posts/${slug}`,
-          title,
-        })
-      )
-    : [];
-
-  return { posts, loading };
-}
-
 export const getStaticProps: GetStaticProps<
   PostPageProps,
   PostPageQuery
 > = async ({ params }) => {
-  const result = await apolloClient.query({
-    query: gql`
-      query {
-        posts(filters: {
-          slug: {
-            eq: "${params?.slug ?? ``}"
-          }
-        }) {
-          data {
-            attributes {
-              title
-              author
-              slug
-              content
-              publishDate
-              avatar {
-                data {
-                  attributes {
-                    url
-                  }
-                }
-              }
-              image {
-                data {
-                  attributes {
-                    url
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
+  const { data } = await apolloClient.query({
+    query: queryPostsBySlug,
+    variables: {
+      slug: params?.slug,
+    },
   });
 
   const {
-    attributes: {
-      author: authorUsername,
-      content,
-      publishDate,
-      title,
-      image: {
-        data: {
-          attributes: { url: imageUrl },
-        },
-      },
-      avatar: {
-        data: {
-          attributes: { url: avatarUrl },
-        },
-      },
-    },
-  } = result.data.posts.data[0];
+    posts: [post],
+  } = decodePosts(data);
+  const content = await processMarkdown(post.content);
 
   return {
     props: {
-      title,
-      image: `https://webservices.jumpingcrab.com${imageUrl}`,
-      authorAvatar: `https://webservices.jumpingcrab.com${avatarUrl}`,
-      publishDate,
-      authorUsername,
-      content: (await remark().use(html).process(content)).toString(),
+      ...post,
+      content,
     },
   };
 };
 
 export const getStaticPaths: GetStaticPaths<PostPageQuery> = async () => {
-  const result = await apolloClient.query({
-    query: gql`
-      query {
-        posts {
-          data {
-            attributes {
-              slug
-            }
-          }
-        }
-      }
-    `,
+  const { data } = await apolloClient.query({
+    query: queryPostsSlugs,
   });
 
-  const {
-    data: {
-      posts: { data: postsSlugs },
-    },
-  } = result;
-
-  const slugs: string[] = postsSlugs.map(
-    ({ attributes: { slug } }: any) => slug
-  );
-
+  const { posts } = decodePosts(data);
+  const paths = posts.map(({ slug }) => ({ params: { slug } }));
   return {
-    paths: slugs.map((slug) => ({ params: { slug } })),
+    paths,
     fallback: false,
   };
 };
-
-const lastestPostsQuery = gql`
-  query {
-    posts(sort: ["updatedAt"], pagination: { limit: 6 }) {
-      data {
-        attributes {
-          title
-          slug
-          image {
-            data {
-              attributes {
-                url
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;

@@ -4,12 +4,16 @@ import {
   ProfileHeader,
   ProfileHeaderProps,
 } from "src/components/ProfileHeader";
-import { apolloClient, gql } from "src/apolloClient";
+import { apolloClient } from "src/apolloClient";
 import { Feed, FeedProps } from "src/components/Feed";
+import { decodeUserInfo } from "src/cms/decoders/decodeUserInfo";
+import { queryUserInfo } from "src/cms/queries/queryUserInfo";
+import { getPostPage } from "src/cms/functions/getPostPage";
+import { mapPostsToFeedItems } from "src/cms/functions/mapPostsToFeedItems";
 
 export type HomeProps = {
   posts: FeedProps["items"];
-  pagination: FeedProps["pagination"];
+  pagination: FeedProps["pagination"] & { total: number };
   userInfo: ProfileHeaderProps;
 };
 
@@ -28,8 +32,8 @@ export default function Home({ posts, pagination, userInfo }: HomeProps) {
 }
 
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
-  const { posts, pagination } = await getPosts();
-  const userInfo = await getUserInfo();
+  const { posts, pagination } = await getFeedProps();
+  const userInfo = await getUserInfoProps(pagination.total);
   return {
     props: {
       posts,
@@ -39,112 +43,31 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   };
 };
 
-async function getUserInfo(): Promise<ProfileHeaderProps> {
-  const result = await apolloClient.query({
-    query: gql`
-      query {
-        userInfo {
-          data {
-            attributes {
-              name
-              username
-              role
-              bio
-              publishCount
-              link
-              avatar {
-                data {
-                  attributes {
-                    url
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
+async function getUserInfoProps(
+  publishCount: number
+): Promise<HomeProps["userInfo"]> {
+  const { data } = await apolloClient.query({
+    query: queryUserInfo,
   });
-
-  const {
-    name,
-    username,
-    role,
-    bio,
-    publishCount,
-    link,
-    avatar: {
-      data: {
-        attributes: { url: avatarUrl },
-      },
-    },
-  } = result.data.userInfo.data.attributes;
-
-  return {
-    name,
-    username,
-    role,
-    bio,
-    publishCount,
-    link,
-    avatar: `https://webservices.jumpingcrab.com${avatarUrl}`,
-  };
+  const userInfo = decodeUserInfo(data);
+  return { ...userInfo, publishCount };
 }
 
-async function getPosts() {
-  const result = await apolloClient.query({
-    query: gql`
-      query {
-        posts(pagination: { pageSize: 9, page: 1 }) {
-          meta {
-            pagination {
-              page
-              pageCount
-            }
-          }
-          data {
-            attributes {
-              title
-              slug
-              image {
-                data {
-                  attributes {
-                    url
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
-  });
+async function getFeedProps(): Promise<{
+  posts: HomeProps["posts"];
+  pagination: HomeProps["pagination"];
+}> {
+  const results = await getPostPage(1);
+  const posts = mapPostsToFeedItems(results.posts);
 
-  const { page: currentPage, pageCount } = result.data.posts.meta.pagination;
-
-  const posts: FeedProps["items"] = result.data.posts.data.map(
-    ({
-      attributes: {
-        title,
-        slug,
-        image: {
-          data: {
-            attributes: { url: image },
-          },
-        },
-      },
-    }: any) => ({
-      image: `https://webservices.jumpingcrab.com${image}`,
-      link: `/posts/${slug}`,
-      title,
-    })
-  );
+  const { pageCount, page: currentPage, total } = results.pagination;
 
   const pagination = {
     currentPage,
     pageCount,
     hasNextPage: pageCount > currentPage,
     hasPreviousPage: false,
+    total,
   };
 
   return { posts, pagination };
