@@ -1,4 +1,4 @@
-import { apolloClient, gql } from "src/apolloClient";
+import { apolloClient } from "src/cms/apolloClient";
 import { decodePosts } from "src/cms/decoders/decodePosts";
 import { queryPostPage } from "src/cms/queries/queryPostPage";
 

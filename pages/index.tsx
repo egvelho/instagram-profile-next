@@ -4,12 +4,12 @@ import {
   ProfileHeader,
   ProfileHeaderProps,
 } from "src/components/ProfileHeader";
-import { apolloClient } from "src/apolloClient";
+import { apolloClient } from "src/cms/apolloClient";
 import { Feed, FeedProps } from "src/components/Feed";
 import { decodeUserInfo } from "src/cms/decoders/decodeUserInfo";
 import { queryUserInfo } from "src/cms/queries/queryUserInfo";
-import { getPostPage } from "src/cms/functions/getPostPage";
-import { mapPostsToFeedItems } from "src/cms/functions/mapPostsToFeedItems";
+import { getPostPage } from "src/cms/getPostPage";
+import { mapPostsToFeedItems } from "src/cms/mapPostsToFeedItems";
 
 export type HomeProps = {
   posts: FeedProps["items"];

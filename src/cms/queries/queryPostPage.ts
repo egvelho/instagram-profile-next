@@ -1,4 +1,4 @@
-import { gql } from "src/apolloClient";
+import { gql } from "src/cms/apolloClient";
 
 export const queryPostPage = gql`
   query GetPostPage($page: Int!) {

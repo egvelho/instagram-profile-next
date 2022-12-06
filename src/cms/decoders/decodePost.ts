@@ -1,4 +1,4 @@
-import { getImageUrl } from "src/apolloClient";
+import { getImageUrl } from "src/cms/getImageUrl";
 
 export type PostData = {
   authorAvatar: string;

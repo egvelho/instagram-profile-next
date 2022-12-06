@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useLazyQuery } from "src/apolloClient";
+import { useLazyQuery } from "src/cms/apolloClient";
 import { debounce } from "lodash";
 import { querySearchPosts } from "../queries/querySearchPosts";
 import { decodePosts } from "../decoders/decodePosts";

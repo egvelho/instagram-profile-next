@@ -1,11 +1,11 @@
 import type { GetStaticPaths, GetStaticProps } from "next";
 import { Head } from "src/components/Head";
 import { Feed, FeedProps } from "src/components/Feed";
-import { apolloClient } from "src/apolloClient";
+import { apolloClient } from "src/cms/apolloClient";
 import { decodePagination } from "src/cms/decoders/decodePagination";
 import { queryPostPageCount } from "src/cms/queries/queryPostPageCount";
-import { getPostPage } from "src/cms/functions/getPostPage";
-import { mapPostsToFeedItems } from "src/cms/functions/mapPostsToFeedItems";
+import { getPostPage } from "src/cms/getPostPage";
+import { mapPostsToFeedItems } from "src/cms/mapPostsToFeedItems";
 
 export type PostPageProps = {
   posts: FeedProps["items"];

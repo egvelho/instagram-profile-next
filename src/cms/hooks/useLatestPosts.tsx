@@ -1,7 +1,7 @@
-import { useQuery } from "src/apolloClient";
+import { useQuery } from "src/cms/apolloClient";
 import { queryLatestPosts } from "../queries/queryLatestPosts";
 import { decodePosts } from "../decoders/decodePosts";
-import { mapPostsToFeedItems } from "../functions/mapPostsToFeedItems";
+import { mapPostsToFeedItems } from "../mapPostsToFeedItems";
 
 export function useLatestPosts() {
   const { data, loading } = useQuery(queryLatestPosts);
