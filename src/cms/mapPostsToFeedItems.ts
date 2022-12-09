@@ -1,4 +1,4 @@
-import { PostsData } from "../decoders/decodePosts";
+import { PostsData } from "./decoders/decodePosts";
 
 export function mapPostsToFeedItems(posts: PostsData["posts"]) {
   return posts.map(({ image, slug, title }) => ({
