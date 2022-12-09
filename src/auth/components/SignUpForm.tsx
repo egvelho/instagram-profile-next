@@ -1,12 +1,33 @@
-import { z } from "zod";
+import { useRouter } from "next/router";
+import { useState, useEffect } from "react";
+import { z, ZodIssue } from "zod";
 import { useZorm } from "react-zorm";
 import useAxios from "axios-hooks";
-import { userSchema, UserSchema } from "../schemas/userSchema";
+import { toast } from "react-toastify";
+import { userSchema, UserSchema } from "src/user/schemas/userSchema";
+import { MdHourglassBottom, MdHourglassTop } from "react-icons/md";
+
+function LoadingIndicator() {
+  const [top, setTop] = useState(true);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => setTop(!top), 500);
+    return () => clearTimeout(timeoutId);
+  }, [top]);
+
+  return top ? (
+    <MdHourglassTop size="16px" color="#2139e0" />
+  ) : (
+    <MdHourglassBottom size="16px" color="#2139e0" />
+  );
+}
 
 const texts = {
   title: "Criar conta",
   submit: "Enviar",
   passwordMatchError: "As senhas são diferentes",
+  submitSuccess: "Conta criada com sucesso",
+  submitFailure: "Houve um erro ao criar sua conta",
 };
 
 const signupSchema = userSchema
@@ -19,7 +40,11 @@ const signupSchema = userSchema
   });
 
 export function SignUpForm() {
-  const [{}, execute] = useAxios<UserSchema, UserSchema>(
+  const router = useRouter();
+  const [{ data, loading }, execute] = useAxios<
+    { user: { id: number }; errors: ZodIssue[] },
+    UserSchema
+  >(
     {
       url: "/api/signup",
       method: "POST",
@@ -30,15 +55,38 @@ export function SignUpForm() {
   );
 
   const { ref, fields, errors, validation } = useZorm("signup", signupSchema, {
-    onValidSubmit(event) {
+    customIssues: data?.errors,
+    async onValidSubmit(event) {
       event.preventDefault();
-      execute({
+      const { data } = await execute({
         data: event.data,
       });
+
+      if (data.user) {
+        toast(texts.submitSuccess, {
+          closeButton: false,
+          hideProgressBar: true,
+          position: "bottom-center",
+          style: {
+            backgroundColor: "#009712",
+            color: "#f9f9f9",
+          },
+        });
+        router.push("/");
+      } else {
+        toast(texts.submitFailure, {
+          closeButton: false,
+          hideProgressBar: true,
+          position: "bottom-center",
+          style: {
+            backgroundColor: "#f11212",
+            color: "#f9f9f9",
+          },
+        });
+      }
     },
   });
-
-  const disabled = validation?.success === false;
+  const disabled = validation?.success === false || loading;
 
   return (
     <form noValidate className="signup-form" ref={ref}>
@@ -48,6 +96,7 @@ export function SignUpForm() {
         placeholder="Nome"
         className={`signup-field ${errors.name("error")}`}
         name={fields.name()}
+        disabled={loading}
       />
       {errors.name((error) => (
         <ErrorMessage message={error.message} />
@@ -57,6 +106,7 @@ export function SignUpForm() {
         placeholder="Sobrenome"
         className={`signup-field ${errors.surname("error")}`}
         name={fields.surname()}
+        disabled={loading}
       />
       {errors.surname((error) => (
         <ErrorMessage message={error.message} />
@@ -66,6 +116,7 @@ export function SignUpForm() {
         placeholder="Email"
         className={`signup-field ${errors.email("error")}`}
         name={fields.email()}
+        disabled={loading}
       />
       {errors.email((error) => (
         <ErrorMessage message={error.message} />
@@ -75,6 +126,7 @@ export function SignUpForm() {
         placeholder="Senha"
         className={`signup-field ${errors.password("error")}`}
         name={fields.password()}
+        disabled={loading}
       />
       {errors.password((error) => (
         <ErrorMessage message={error.message} />
@@ -89,7 +141,7 @@ export function SignUpForm() {
         <ErrorMessage message={error.message} />
       ))}
       <button disabled={disabled} type="submit" className="signup-submit">
-        {texts.submit}
+        {loading ? <LoadingIndicator /> : texts.submit}
       </button>
       <style jsx>{`
         .signup-form {
@@ -136,6 +188,10 @@ export function SignUpForm() {
 
         .signup-submit:hover {
           background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .signup-field:disabled {
+          border-color: #ccc;
         }
 
         .signup-submit:disabled {
