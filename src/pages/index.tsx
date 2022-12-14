@@ -10,6 +10,7 @@ import { decodeUserInfo } from "src/cms/decoders/decodeUserInfo";
 import { queryUserInfo } from "src/cms/queries/queryUserInfo";
 import { getPostPage } from "src/cms/getPostPage";
 import { mapPostsToFeedItems } from "src/cms/mapPostsToFeedItems";
+import { useSession } from "next-auth/react";
 
 export type HomeProps = {
   posts: FeedProps["items"];
@@ -18,6 +19,8 @@ export type HomeProps = {
 };
 
 export default function Home({ posts, pagination, userInfo }: HomeProps) {
+  const { data, status } = useSession();
+  console.log("session", data, status);
   return (
     <article>
       <Head title="Home" />

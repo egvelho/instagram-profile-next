@@ -6,6 +6,7 @@ export default async function signupHandler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
+    req.body && (req.body.provider = "credentials");
     const results = await userRepository.create(req.body, {
       select: {
         id: true,

@@ -1,11 +1,15 @@
-import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { z, ZodIssue } from "zod";
 import { useZorm } from "react-zorm";
 import useAxios from "axios-hooks";
 import { toast } from "react-toastify";
-import { userSchema, UserSchema } from "src/user/schemas/userSchema";
+import {
+  baseUserSchema,
+  BaseUserSchema,
+} from "src/user/schemas/baseUserSchema";
+import { passwordSchema } from "src/user/schemas/base/passwordSchema";
 import { MdHourglassBottom, MdHourglassTop } from "react-icons/md";
+import { signIn } from "next-auth/react";
 
 function LoadingIndicator() {
   const [top, setTop] = useState(true);
@@ -30,8 +34,9 @@ const texts = {
   submitFailure: "Houve um erro ao criar sua conta",
 };
 
-const signupSchema = userSchema
+const signupSchema = baseUserSchema
   .extend({
+    password: passwordSchema,
     confirmPassword: z.string().min(0),
   })
   .refine(({ password, confirmPassword }) => password === confirmPassword, {
@@ -40,10 +45,9 @@ const signupSchema = userSchema
   });
 
 export function SignUpForm() {
-  const router = useRouter();
   const [{ data, loading }, execute] = useAxios<
     { user: { id: number }; errors: ZodIssue[] },
-    UserSchema
+    BaseUserSchema
   >(
     {
       url: "/api/signup",
@@ -72,7 +76,10 @@ export function SignUpForm() {
             color: "#f9f9f9",
           },
         });
-        router.push("/");
+        signIn("credentials", {
+          username: event.data.email,
+          password: event.data.password,
+        });
       } else {
         toast(texts.submitFailure, {
           closeButton: false,
