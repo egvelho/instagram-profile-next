@@ -6,8 +6,8 @@ import * as userService from "src/user/userService";
 
 export const authOptions: AuthOptions = {
   callbacks: {
-    redirect({ baseUrl }) {
-      return baseUrl;
+    redirect() {
+      return "/user/profile";
     },
     async session({ session }) {
       const userSession = await userService.getUserSessionData(
