@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { allowedProviders } from "src/auth/allowedProviders";
+import { allowedProvidersList } from "src/auth/allowedProviders";
 
 const messages = {
   invalidProvider:
@@ -8,6 +8,6 @@ const messages = {
 
 export const providerSchema = z
   .string()
-  .refine((provider) => allowedProviders.includes(provider), {
+  .refine((provider) => allowedProvidersList.includes(provider), {
     message: messages.invalidProvider,
   });

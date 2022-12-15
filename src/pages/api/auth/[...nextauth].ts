@@ -1,21 +1,24 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import { allowedProviders } from "src/auth/allowedProviders";
 import * as userService from "src/user/userService";
 
 export const authOptions: AuthOptions = {
   callbacks: {
     redirect() {
-      return "/";
+      return "/user/profile";
     },
     async session({ session }) {
-      const userSession = await userService.getUserSession(session.user.email);
+      const userSession = await userService.getUserSessionData(
+        session.user.email
+      );
       session.user = userSession;
       return session;
     },
     async signIn({ account, profile }) {
       if (
-        account?.provider === "google" &&
+        account?.provider === allowedProviders.google &&
         profile?.email &&
         (profile as any)?.given_name &&
         (profile as any)?.family_name
@@ -29,7 +32,7 @@ export const authOptions: AuthOptions = {
           name,
           surname,
           email,
-          provider: "google",
+          provider: allowedProviders.google,
         });
         return success;
       }

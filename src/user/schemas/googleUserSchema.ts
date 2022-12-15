@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { allowedProviders } from "src/auth/allowedProviders";
 import { baseUserSchema } from "./baseUserSchema";
 import { providerSchema } from "./base/providerSchema";
 import { uniqueEmailSchema } from "./base/uniqueEmailSchema";
@@ -8,7 +9,7 @@ const messages = {
 };
 
 const googleProviderSchema = providerSchema.refine(
-  (provider) => provider === "google",
+  (provider) => provider === allowedProviders.google,
   {
     message: messages.invalidProvider,
   }

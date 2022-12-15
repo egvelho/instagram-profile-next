@@ -35,7 +35,11 @@ export async function googleLogin(
     },
   });
   if (maybeUser === null) {
-    const results = await userRepository.create(user);
+    const results = await userRepository.create(user, {
+      select: {
+        id: true,
+      },
+    });
     if (results.user !== undefined) {
       return {
         success: true,
@@ -52,10 +56,17 @@ export async function googleLogin(
   };
 }
 
-export async function getUserSession(email: string) {
-  const maybeUser = await userRepository.findByEmail(email);
+export async function getUserSessionData(email: string) {
+  const maybeUser = await userRepository.findByEmail(email, {
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      surname: true,
+    },
+  });
   const userSession: Session["user"] = {
-    userId: maybeUser?.id.toString() ?? "",
+    userId: maybeUser?.id ?? NaN,
     email: maybeUser?.email ?? "",
     name: `${maybeUser?.name} ${maybeUser?.surname}`,
   };

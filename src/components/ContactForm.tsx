@@ -206,7 +206,7 @@ export function ContactForm() {
       </form>
       <style jsx>{`
         .contact-form-container {
-          margin: 12px;
+          margin: 12px 0;
         }
 
         .contact-form {

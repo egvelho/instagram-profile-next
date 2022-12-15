@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { Avatar } from "src/components/Avatar";
-import { GrHomeRounded, GrLogout, GrLogin } from "react-icons/gr";
+import { GrHomeRounded, GrLogout, GrLogin, GrChat } from "react-icons/gr";
 import { signOut, useSession } from "next-auth/react";
 
 const bottomNavigationHeight = "48px";
@@ -10,17 +11,22 @@ export function BottomNavigation() {
   return (
     <div className="bottom-navigation">
       {status === "authenticated" && (
-        <a
-          href="/api/auth/signout"
-          className="item"
-          title="Sair"
-          onClick={(event) => {
-            event.preventDefault();
-            signOut();
-          }}
-        >
-          <GrLogout size="22px" aria-label="Sair" />
-        </a>
+        <>
+          <a
+            href="/api/auth/signout"
+            className="item"
+            title="Sair"
+            onClick={(event) => {
+              event.preventDefault();
+              signOut();
+            }}
+          >
+            <GrLogout size="22px" aria-label="Sair" />
+          </a>
+          <a className="item" href="/user/messenger" title="Conversar">
+            <GrChat size="22px" aria-label="Conversar" />
+          </a>
+        </>
       )}
       {status === "unauthenticated" && (
         <a className="item" href="/api/auth/signin" title="Entrar">
@@ -31,12 +37,14 @@ export function BottomNavigation() {
         <GrHomeRounded size="22px" aria-label="Home" />
       </a>
       <span className="item">
-        <Avatar
-          size={36}
-          name={data?.user.name}
-          src={data?.user.name ? undefined : "/avatar.jpeg"}
-          alt=""
-        />
+        <Link href={data?.user ? "/user/profile" : "/signup"}>
+          <Avatar
+            size={36}
+            name={data?.user.name}
+            src={data?.user.name ? undefined : "/avatar.jpeg"}
+            alt=""
+          />
+        </Link>
       </span>
       <style jsx>{`
         .bottom-navigation {

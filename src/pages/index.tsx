@@ -20,7 +20,6 @@ export type HomeProps = {
 
 export default function Home({ posts, pagination, userInfo }: HomeProps) {
   const { data, status } = useSession();
-  console.log("session", data, status);
   return (
     <article>
       <Head title="Home" />

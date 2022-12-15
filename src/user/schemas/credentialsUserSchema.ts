@@ -1,5 +1,6 @@
 import { z } from "zod";
 import bcrypt from "bcrypt";
+import { allowedProviders } from "src/auth/allowedProviders";
 import { baseUserSchema } from "./baseUserSchema";
 import { passwordSchema } from "./base/passwordSchema";
 import { providerSchema } from "./base/providerSchema";
@@ -14,7 +15,7 @@ const hashedPasswordSchema = passwordSchema.transform(
 );
 
 const credentialsProviderSchema = providerSchema.refine(
-  (provider) => provider === "credentials",
+  (provider) => provider === allowedProviders.credentials,
   {
     message: messages.invalidProvider,
   }
