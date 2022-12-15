@@ -189,10 +189,12 @@ export default function MessengerPage({ contacts, user }: MessengerPageProps) {
 
         .my-message {
           align-self: flex-end;
+          background-color: #dff9fb;
         }
 
         .its-message {
           align-self: flex-start;
+          background-color: #f7f1e3;
         }
       `}</style>
     </div>

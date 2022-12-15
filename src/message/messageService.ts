@@ -9,8 +9,16 @@ export async function getLatestMessages({
 }) {
   const messages = await messageRepository.findMany({
     where: {
-      senderId,
-      receiverId,
+      OR: [
+        {
+          senderId,
+          receiverId,
+        },
+        {
+          receiverId: senderId,
+          senderId: receiverId,
+        },
+      ],
     },
     select: {
       id: true,
